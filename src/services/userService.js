@@ -97,30 +97,38 @@ let getAllUsers = (userId) => {
 let createNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            //check email có tồn tại ?
             let check = await checkUserEmail(data.email);
-            if (check === true) {
+            //Check vailde email
+            let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if (!re.test(data.email)) {
                 resolve({
-                    errCode: 1,
-                    erMmessage: "Your email is already is used, Plase another email!"
+                    errCode: 2,
+                    errMessage: "email is invalid"
                 })
-            } else {
-                let hashPasswordFromBcrypt = await hashUserPassword(data.password);
-                await db.User.create({
-                    email: data.email,
-                    password: hashPasswordFromBcrypt,
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    address: data.address,
-                    phonenumber: data.phonenumber,
-                    gender: data.gender === '1' ? true : false,
-                    roleId: data.roleId,
-                })
-                resolve({
-                    errCode: 0,
-                    message: 'OK'
-                })
-            }
+            } else
+                //check email có tồn tại ?
+                if (check === true) {
+                    resolve({
+                        errCode: 1,
+                        errMessage: "Your email is already is used, Plase another email!"
+                    })
+                } else {
+                    let hashPasswordFromBcrypt = await hashUserPassword(data.password);
+                    await db.User.create({
+                        email: data.email,
+                        password: hashPasswordFromBcrypt,
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        address: data.address,
+                        phonenumber: data.phonenumber,
+                        gender: data.gender === '1' ? true : false,
+                        roleId: data.roleId,
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'OK'
+                    })
+                }
         } catch (e) {
             reject(e)
         }
